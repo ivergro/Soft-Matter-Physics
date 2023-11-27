@@ -301,6 +301,6 @@ filename_E = "energies_L=25_sweeps=100.txt"
 
 filepath = "data/ex_2_3_1/"
 filename = "rej_meth_N=10000_p=0.600000.txt"
-rejection_method(filepath, filename, True)
-G_value_plot(filepath, "G_vals" + filename[8:], True)
+rejection_method(filepath, filename, False)
+G_value_plot(filepath, "G_vals" + filename[8:], False)
 
