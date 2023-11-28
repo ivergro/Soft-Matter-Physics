@@ -6,12 +6,11 @@ mt19937 metropolis_gen(1); // Seed for Metropolis function
 mt19937 glauber_gen(2);    // Seed for Glauber function
 mt19937 spin_gen(3);       // Seed for spin initialization
 
-bool metropolis(const double delta_E, const double T){
+bool metropolis(const double delta_E, const double beta){
     // random_device rd;
     uniform_real_distribution<double> distribution(0.0, 1.0); //Creates a uniform distribution from 0 to 1
     // double p = (double) rand() / RAND_MAX;
     double p = distribution(metropolis_gen);
-    double beta = 1/(K_b*T);
     double a_ij = min(exp(-beta*delta_E), 1.);
     return p <= a_ij;
 }
@@ -29,7 +28,7 @@ void glauber(const int L, const double T, int &E, int &M, vector<vector<int>> &s
     //Random numbers from 0 to L-1
     // int r_col = rand() % L; 
     // int r_row = rand() % L;
-    mt19937 gen(1); //seed
+    const double beta = 1/(K_b*T);
     uniform_int_distribution<int> distribution(0, L-1); 
     int r_col = distribution(glauber_gen);
     int r_row = distribution(glauber_gen);
@@ -41,7 +40,7 @@ void glauber(const int L, const double T, int &E, int &M, vector<vector<int>> &s
         int delta_E = 2*spin_val * J *calculate_neighbour_values(L, spins, r_row, r_col); //Per def fra notes 4 (1.62)
 
         //Doing metropolis acceptance to see if the change in spin should happen. Ignoring it if not succeded.
-        if (metropolis(delta_E, T)){
+        if (metropolis(delta_E, beta)){
             E += delta_E;
             M -= 2*spin_val;  //New total spin is previous minus 2 times the opposite spin value of chosen positions
             *sigma_pointer = -*sigma_pointer; //Changing spin
@@ -76,19 +75,23 @@ int calculate_neighbour_values(const int L, const vector<vector<int>> spins,cons
     return row_neighbours + col_neighbours;
 }
 
-vector<vector<int>> initialize_spins(const int L){
-    vector<vector<int>> spins(L,vector<int>(L));
+vector<vector<int>> initialize_spins(const int L, int &M){
+    vector<vector<int>> spins;
+    spins.reserve(L); //Reserving space for L vectors
     uniform_int_distribution<int> distribution(0,1); //Creates a uniform distribution from 0 to 1
     
     for (int row = 0; row < L; row++){
-        vector<int> *current_row_pointer = &spins.at(row); //Using pointer to try and save run time by extracting each row once
+        spins.emplace_back(); //Adding a row
+        spins.back().reserve(L); //Reserving space for L spins on newest row
         for (int col = 0; col < L; col++){
             int r_val = (distribution(spin_gen) % 2 == 0) ? -1 : 1; //Randomly picks from 0 to 1, if 0 -> -1, else 1
-            (*current_row_pointer).at(col) = r_val;
+            (spins.back()).emplace_back(r_val);
+            M += r_val;
         }
     }
     return spins;
 }
+
 
 int calculate_M(const vector<vector<int>> spins){
     int sum = 0;
@@ -116,9 +119,9 @@ void run_IM(const double T, const int L, const int sweeps){
     int save_every = (sweeps < 10000) ? 1 : sweeps / 10000;
     int M = 0;
     //Initialize
-    vector<vector<int>> spins = initialize_spins(L);
+    vector<vector<int>> spins = initialize_spins(L, M);
     E = calculate_E(L, spins);
-    M = calculate_M(spins);
+    // M = calculate_M(spins);
     vector<int> timesteps;
     vector<int> energies;
     // vector<int> energies_squared;
@@ -147,7 +150,7 @@ void run_IM(const double T, const int L, const int sweeps){
 
     //Saving values to be analyzed
     cout << "Final energy: " << E << "  after " << sweeps << " sweeps" << endl;
-    string directory = "./data/" + to_string(int(T)) + "/";
+    string directory = "./data/T=" + to_string(int(T)) + "/";
     classic_write_to_file(timesteps, directory, "timesteps_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     classic_write_to_file(energies, directory, "energies_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     // classic_write_to_file(energies_squared, directory, "energies_squared_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
@@ -155,7 +158,7 @@ void run_IM(const double T, const int L, const int sweeps){
     // classic_write_to_file(magnetizations_squared, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
 }
 
-pair<double,double> run_IM_different_temps(const double T, const int L, const int sweeps,const vector<vector<int>> &spins){
+pair<double,double>     run_IM_different_temps(const double T, const int L, const int sweeps,const vector<vector<int>> &spins){
     //Initializing
     const int N = pow(L,2);
     vector<vector<int>> temp_spins = spins; //Copying initialized spins
@@ -207,3 +210,8 @@ pair<double,double> run_IM_different_temps(const double T, const int L, const in
     return pair<double,double> (specific_heat, susceptibility);
     
 }
+
+void Ising_Model(int L){
+
+}
+

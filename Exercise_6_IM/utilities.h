@@ -1,4 +1,5 @@
 #pragma once
-#include "std_lib_facilities.h"
+#include <vector>
+using namespace std;
 
 vector<double> linspace(double start, double end, int numPoints);

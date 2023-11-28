@@ -1,6 +1,11 @@
 #pragma once
-#include "std_lib_facilities.h"
+// #include "std_lib_facilities.h"
 #include "filewriter.h"
+#include <vector>
+#include <iostream>
+#include <cmath>
+#include <random>
+using namespace std;
 
 //Constants
 constexpr double K_b = 1;
@@ -15,7 +20,7 @@ int calculate_E(const int L, const vector<vector<int>> spins);
 
 int calculate_neighbour_values(const int L, const vector<vector<int>> spins, const int row, const int col);
 
-vector<vector<int>> initialize_spins(const int L);
+vector<vector<int>> initialize_spins(const int L, int &M);
 
 int calculate_M(const vector<vector<int>> spins);
 
