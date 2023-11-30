@@ -6,6 +6,10 @@ mt19937 metropolis_gen(1); // Seed for Metropolis function
 mt19937 glauber_gen(2);    // Seed for Glauber function
 mt19937 spin_gen(3);       // Seed for spin initialization
 
+constexpr double K_b = 1;
+constexpr double J   = 1;
+const double T_c = 2.*J/(log(1+sqrt(2))*K_b); //Cant have constexpr when using func
+
 bool metropolis(const double delta_E, const double beta){
     // random_device rd;
     uniform_real_distribution<double> distribution(0.0, 1.0); //Creates a uniform distribution from 0 to 1
@@ -56,7 +60,7 @@ void glauber(const int L, const double T, int &E, int &M, vector<vector<int>> &s
  * @param spins 
  * @return int sum of total energy 
  */
-int calculate_E(const int L, const vector<vector<int>> spins){
+int calculate_E(const int L, const vector<vector<int>> &spins){
     int sum = 0;
     for (int row = 0; row < L; row++) {
         for (int col = 0; col < L; col++) {
@@ -69,7 +73,7 @@ int calculate_E(const int L, const vector<vector<int>> spins){
     return sum;
 }
 
-int calculate_neighbour_values(const int L, const vector<vector<int>> spins,const int row,const int col){
+int calculate_neighbour_values(const int L, const vector<vector<int>> &spins,const int row,const int col){
     int row_neighbours = (spins.at(row)).at((L + col + 1) % L) + (spins.at(row)).at((L + col - 1) % L); //Using modulo to ensure periodic BC
     int col_neighbours = (spins.at((L + row - 1) % L)).at(col) + (spins.at((L + row + 1) % L)).at(col); //Using modulo to ensure periodic BC
     return row_neighbours + col_neighbours;
@@ -93,7 +97,7 @@ vector<vector<int>> initialize_spins(const int L, int &M){
 }
 
 
-int calculate_M(const vector<vector<int>> spins){
+int calculate_M(const vector<vector<int>> &spins){
     int sum = 0;
     for (const std::vector<int>& row : spins) {
         for (int value : row) {
@@ -126,6 +130,7 @@ void run_IM(const double T, const int L, const int sweeps){
     vector<int> energies;
     // vector<int> energies_squared;
     vector<int> magnetizations;
+    vector<vector<vector<int>>> saved_spin_values;
     // vector<int> magnetizations_squared;
     cout << "Initial energy: " << E << endl;
     // classic_write_to_file(spins, "./data/", "initialized_spins.txt");
@@ -133,6 +138,7 @@ void run_IM(const double T, const int L, const int sweeps){
     timesteps.push_back(0);
     energies.push_back(E);
     magnetizations.push_back(M);
+    saved_spin_values.push_back(spins);
     for (int t = 1; t < sweeps; t++){
         glauber(L, T, E, M, spins); //Does the changes to the vector globally instead of returning the spins
         // E = pair_energies.first;
@@ -145,17 +151,21 @@ void run_IM(const double T, const int L, const int sweeps){
             // energies_squared.push_back(E_squared);
             magnetizations.push_back(calculate_M(spins));
             // magnetizations_squared.push_back
-        }   
+        }
+        if (t%100 == 0){
+            saved_spin_values.push_back(spins); //Saving spin values
+        }
     }
 
     //Saving values to be analyzed
     cout << "Final energy: " << E << "  after " << sweeps << " sweeps" << endl;
-    string directory = "./data/T=" + to_string(int(T)) + "/";
-    classic_write_to_file(timesteps, directory, "timesteps_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    classic_write_to_file(energies, directory, "energies_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    // classic_write_to_file(energies_squared, directory, "energies_squared_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    classic_write_to_file(magnetizations, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    string directory = "./data/T=" + to_string(T) + "/";
+    // classic_write_to_file(timesteps, directory, "timesteps_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    // classic_write_to_file(energies, directory, "energies_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    // // classic_write_to_file(energies_squared, directory, "energies_squared_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    // classic_write_to_file(magnetizations, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     // classic_write_to_file(magnetizations_squared, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    classic_write_3Dvec_to_file(saved_spin_values, directory, "saved_spin_values_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
 }
 
 pair<double,double>     run_IM_different_temps(const double T, const int L, const int sweeps,const vector<vector<int>> &spins){
