@@ -34,11 +34,13 @@ void glauber(const int L, const double T, int &E, int &M, vector<vector<int>> &s
     // int r_row = rand() % L;
     const double beta = 1/(K_b*T);
     uniform_int_distribution<int> distribution(0, L-1); 
-    int r_col = distribution(glauber_gen);
-    int r_row = distribution(glauber_gen);
+
+
     const int N = pow(L,2); //Number of spins
     for (int t = 0; t < N; t++){
         //Pick out one random position ij = [r_row][r_col] and returning the adress to that point
+        int r_col = distribution(glauber_gen);
+        int r_row = distribution(glauber_gen);
         int* sigma_pointer = &(spins.at(r_row)).at(r_col); //The spin pointer
         const int spin_val = *sigma_pointer;
         int delta_E = 2*spin_val * J *calculate_neighbour_values(L, spins, r_row, r_col); //Per def fra notes 4 (1.62)
@@ -160,10 +162,10 @@ void run_IM(const double T, const int L, const int sweeps){
     //Saving values to be analyzed
     cout << "Final energy: " << E << "  after " << sweeps << " sweeps" << endl;
     string directory = "./data/T=" + to_string(T) + "/";
-    // classic_write_to_file(timesteps, directory, "timesteps_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    // classic_write_to_file(energies, directory, "energies_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    classic_write_to_file(timesteps, directory, "timesteps_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    classic_write_to_file(energies, directory, "energies_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     // // classic_write_to_file(energies_squared, directory, "energies_squared_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    // classic_write_to_file(magnetizations, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    classic_write_to_file(magnetizations, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     // classic_write_to_file(magnetizations_squared, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     classic_write_3Dvec_to_file(saved_spin_values, directory, "saved_spin_values_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
 }
@@ -221,7 +223,5 @@ pair<double,double>     run_IM_different_temps(const double T, const int L, cons
     
 }
 
-void Ising_Model(int L){
 
-}
 
