@@ -28,15 +28,13 @@ def plot_avgE_avgM_of_t(filepath, filename_E, filename_M, filename_t, save=False
 
     # Show the plot or save it to a file
     if save:
-        new_filepath = "./figures/E_M_over_t/" + filename_E[:-4]
+        new_filepath = "./figures/L="+str(L)+"/" 
+        new_filename = "T="+str(T)+"_E_and_M_sweeps="+str(sweeps)+".png"
         directory_path = os.path.dirname(new_filepath)
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
-        plt.savefig(new_filepath)
-        if not os.path.exists(filepath + filename_E):
-            print(f"Could not create the file '{filepath + filename_E}'")
-        else:
-            print("Figure saved in local path: " + new_filepath)
+        plt.savefig(new_filepath+new_filename)
+        print("Figure saved in local path: " + new_filepath)
     else:
         plt.show()
 
@@ -98,7 +96,83 @@ def plot_susceptibility(filepath, filename_X, filename_T, save=False):
     else:
         plt.show()
 
+def print_observables(filepath, filename_E, filename_M, save=False):
+    t_eq = 4500
+    energies =  np.array(load_vector(filepath + filename_E))[t_eq:]
+    magnetizations = np.array(load_vector(filepath + filename_M))[t_eq:] #Cutting of data before equilibrium
 
+    kb = 1
+    int_values = [match.group() for match in re.finditer(r'\d+', filepath + filename_E)] #Saving L value in filename to take averages
+    T = float(int_values[0] + "." + int_values[1])
+
+    average_enery = sum(energies)/len(energies)
+    average_enery_squared = sum(energies**2)/len(energies)
+    average_mag = sum(magnetizations)/len(magnetizations)
+    average_mag_squared = sum(magnetizations**2)/len(magnetizations)
+
+    Cv = (average_enery_squared - average_enery**2)/(kb*T**2*L**2) #Skal jeg ha L**2?
+    Nxt = (average_mag_squared - average_mag**2)/(kb*T*len(magnetizations))
+    print("Results for L=", L, " and T=", T, ":")
+    print("-----------------------------------")
+    print("Specific heat Cv = ", Cv)
+    print("Magneticusceptibily: ", Nxt)
+    print("-----------------------------------")
+
+def autocorrelation_time(filepath, filename_E, filename_M, t, save=False):
+    t_eq = 4000
+    energies =  np.array(load_vector(filepath + filename_E))[t_eq:]
+    magnetizations = np.array(load_vector(filepath + filename_M))[t_eq:] #Cutting of data before equilibrium
+
+    kb = 1
+    def Co(t, O):
+        Co_first = 0
+        Co_second = 0
+        Co_third = 0
+        t_max = len(O)
+        div_fac = 1/(t_max - t)
+        if t != 0:
+            for t_it in range(t_max-t):
+                Co_first += O[t_it] * O[t_it + 1] * div_fac
+                Co_second += O[t_it] * div_fac
+                Co_third += O[t_it + 1] * div_fac
+        else:
+            for t_it in range(t_max-t):
+                Co_first += O[t_it] * O[t_it] * div_fac
+                Co_second += O[t_it] * div_fac
+                Co_third += O[t_it] * div_fac
+        return Co_first - Co_second*Co_third
+
+    tau_mag = sum([Co(t_it, magnetizations/len(magnetizations)) for t_it in range(t)])
+    tau_en = sum([Co(t_it, energies/len(energies)) for t_it in range(t)])
+    print(f"Magnetic Co: {Co(t, magnetizations/len(magnetizations))}")
+    print(f"Energy Co: {Co(t, energies/(len(energies)))}")
+    print(f"Tau for magnetization = {tau_mag}")
+    print(f"Tau for energy = {tau_en}")
+
+
+def save_configurations(filepath, filename, sweeps, L, save=False):
+    data = load_3D_vector(filepath + filename)
+    dt = int(sweeps/len(data))
+    T = float([match.group() for match in re.finditer(r'\d+', filepath + filename_E)][0]) #super stupid but works
+    save_frames = [0,len(data)//2,len(data) - 1] #first, middle, last
+
+    fig, ax = plt.subplots()
+
+    for el in data[save_frames[1]]:
+        print(len(el))
+        if len(el) > 25:
+            print(el)
+    if save:
+        pass
+    else:
+        for pos in save_frames:
+            lattice_array = np.array(data[pos], dtype=float)   
+
+            print("pos: ", pos, "\tlen=", len(data[pos]), "\n", data[pos])
+            ax.imshow(lattice_array, cmap='bwr', interpolation='none', label='Spin values')
+            ax.set_title('Spin values for t='+str(dt*(pos+1)))
+            ax.text(0.02, 0.95, '', transform=ax.transAxes, path_effects=[pe.withStroke(linewidth=3, foreground='w')])
+            plt.show()
 
 def show_2D_animation(filepath, filename, sweeps, L, save=False):
     data = load_3D_vector(filepath + filename)
@@ -124,7 +198,6 @@ def show_2D_animation(filepath, filename, sweeps, L, save=False):
         return img, time_text
     
     ani = animation.FuncAnimation(fig, update_2D_plot, frames=len(data), fargs=(data, img), interval=500, blit=True)
-
     if save:
         
         ani.save("./figures/animations/L="+str(L)+"/spins_T="+str(T)+"_sweeps="+str(sweeps)+".gif", writer='Pillow', fps=60)
@@ -177,7 +250,7 @@ def load_3D_vector(filename):
                 temp_matrice = matrices.split(",")
                 for i in range(len(temp_matrice)):
                     try:
-                        temp_matrice[i] =  list(map(int,temp_matrice[i].split()))
+                        temp_matrice[i] =  list(map(float,temp_matrice[i].split()))
                     except(ValueError): #Nice to have since some blanksoaces fucks up the code
                         print(temp_matrice[i])
                         print(temp_matrice[i].split(" "))
@@ -185,23 +258,22 @@ def load_3D_vector(filename):
                 lattices.append(temp_matrice)
     return lattices
 
-    lattices.append(temp_matrice)
-#-----------Help Functions------------
-def calculate_susceptibiliy(energies):
-    expected_squared_E = []
+#-------------------------------------
+
 
 T_c = 2.269185
-T = 1.000000
-L = 25
-sweeps = 1000
+T = 3.000000
+L = 50
+sweeps = 10000
 filepath = "./data/T={:.6f}/".format(T_c)
 filename_t = "timesteps_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
 filename_E = "energies_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
 filename_M = "magnetizations_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
 filename_spins = "saved_spin_values_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
 
-plot_avgE_avgM_of_t(filepath, filename_E, filename_M, filename_t, True)
-show_2D_animation(filepath, filename_spins, sweeps, L, False)
+# plot_avgE_avgM_of_t(filepath, filename_E, filename_M, filename_t, True)
+# show_2D_animation(filepath, filename_spins, sweeps, L, False)
+# save_configurations(filepath, filename_spins, sweeps, L, False)
 
 filepath_2 = "./data/L="+str(L)+"/"
 filename_Cv = "specific_heat_sweeps="+str(sweeps)+".txt"
@@ -211,3 +283,5 @@ filename_T = "Temps"
 
 # plot_Cv(filepath_2, filename_Cv, filename_T)
 # plot_susceptibility(filepath_2,filename_X,filename_T)
+# print_observables(filepath, filename_E, filename_M)
+autocorrelation_time(filepath, filename_E, filename_M, 2000)
