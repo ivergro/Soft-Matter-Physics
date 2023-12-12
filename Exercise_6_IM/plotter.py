@@ -4,6 +4,7 @@ import matplotlib.patheffects as pe
 import os
 import numpy as np
 import re
+from scipy.optimize import curve_fit
 
 def plot_avgE_avgM_of_t(filepath, filename_E, filename_M, filename_t, save=False):
     # Create a plot of energy vs. timesteps
@@ -38,63 +39,63 @@ def plot_avgE_avgM_of_t(filepath, filename_E, filename_M, filename_t, save=False
     else:
         plt.show()
 
-def plot_Cv(filepath, filename_Cv, filename_T, save=False):
-    # Create a plot of specific_heat vs. temp
-    Temps = np.array(load_vector(filepath + filename_T))
-    specific_heat =  np.array(load_vector(filepath + filename_Cv))
-    int_values = [match.group() for match in re.finditer(r'\d+', filepath)] #Saving L value in filename to take averages
+# def plot_Cv(filepath, filename_Cv, filename_T, save=False):
+#     # Create a plot of specific_heat vs. temp
+#     Temps = np.array(load_vector(filepath + filename_T))
+#     specific_heat =  np.array(load_vector(filepath + filename_Cv))
+#     int_values = [match.group() for match in re.finditer(r'\d+', filepath)] #Saving L value in filename to take averages
 
-    plt.plot(Temps, specific_heat, linestyle='-', color='g', label=r'C_V(T)')
+#     plt.plot(Temps, specific_heat, linestyle='-', color='g', label=r'C_V(T)')
 
-    # Add labels and a legend
-    plt.xlabel('Temperature')
-    # plt.ylabel('Energy')
-    plt.title('Specific heat for L='+int_values[0])
-    plt.legend()
+#     # Add labels and a legend
+#     plt.xlabel('Temperature')
+#     # plt.ylabel('Energy')
+#     plt.title('Specific heat for L='+int_values[0])
+#     plt.legend()
 
-    # Show the plot or save it to a file
-    # plt.show()  # Use this to display the plot interactively
-    if save:
-        new_filepath = "./figures/ex_6/" + filename_Cv[:-4]
-        directory_path = os.path.dirname(new_filepath)
-        if not os.path.exists(directory_path):
-            os.makedirs(directory_path)
-        plt.savefig(new_filepath)
-        if not os.path.exists(filepath + filename_Cv):
-            print(f"Could not create the file '{filepath + filename_Cv}'")
-        else:
-            print("Figure saved in local path: " + new_filepath)
-    else:
-        plt.show()
+#     # Show the plot or save it to a file
+#     # plt.show()  # Use this to display the plot interactively
+#     if save:
+#         new_filepath = "./figures/ex_6/" + filename_Cv[:-4]
+#         directory_path = os.path.dirname(new_filepath)
+#         if not os.path.exists(directory_path):
+#             os.makedirs(directory_path)
+#         plt.savefig(new_filepath)
+#         if not os.path.exists(filepath + filename_Cv):
+#             print(f"Could not create the file '{filepath + filename_Cv}'")
+#         else:
+#             print("Figure saved in local path: " + new_filepath)
+#     else:
+#         plt.show()
 
-def plot_susceptibility(filepath, filename_X, filename_T, save=False):
-    # Create a plot of specific_heat vs. temp
-    Temps = np.array(load_vector(filepath + filename_T))
-    specific_heat =  np.array(load_vector(filepath + filename_X))
-    int_values = [match.group() for match in re.finditer(r'\d+', filepath)] #Saving L value in filename to take averages
+# def plot_susceptibility(filepath, filename_X, filename_T, save=False):
+#     # Create a plot of specific_heat vs. temp
+#     Temps = np.array(load_vector(filepath + filename_T))
+#     specific_heat =  np.array(load_vector(filepath + filename_X))
+#     int_values = [match.group() for match in re.finditer(r'\d+', filepath)] #Saving L value in filename to take averages
 
-    plt.plot(Temps, specific_heat, linestyle='-', color='g', label=r'X(T)')
+#     plt.plot(Temps, specific_heat, linestyle='-', color='g', label=r'X(T)')
 
-    # Add labels and a legend
-    plt.xlabel('Temperature')
-    # plt.ylabel('Energy')
-    plt.title('Susceptibility for L='+int_values[0])
-    plt.legend()
+#     # Add labels and a legend
+#     plt.xlabel('Temperature')
+#     # plt.ylabel('Energy')
+#     plt.title('Susceptibility for L='+int_values[0])
+#     plt.legend()
 
-    # Show the plot or save it to a file
-    # plt.show()  # Use this to display the plot interactively
-    if save:
-        new_filepath = "./figures/ex_6/" + filename_X[:-4]
-        directory_path = os.path.dirname(new_filepath)
-        if not os.path.exists(directory_path):
-            os.makedirs(directory_path)
-        plt.savefig(new_filepath)
-        if not os.path.exists(filepath + filename_X):
-            print(f"Could not create the file '{filepath + filename_X}'")
-        else:
-            print("Figure saved in local path: " + new_filepath)
-    else:
-        plt.show()
+#     # Show the plot or save it to a file
+#     # plt.show()  # Use this to display the plot interactively
+#     if save:
+#         new_filepath = "./figures/ex_6/" + filename_X[:-4]
+#         directory_path = os.path.dirname(new_filepath)
+#         if not os.path.exists(directory_path):
+#             os.makedirs(directory_path)
+#         plt.savefig(new_filepath)
+#         if not os.path.exists(filepath + filename_X):
+#             print(f"Could not create the file '{filepath + filename_X}'")
+#         else:
+#             print("Figure saved in local path: " + new_filepath)
+#     else:
+#         plt.show()
 
 def print_observables(filepath, filename_E, filename_M, save=False):
     t_eq = 4500
@@ -117,11 +118,21 @@ def print_observables(filepath, filename_E, filename_M, save=False):
     print("Specific heat Cv = ", Cv)
     print("Magneticusceptibily: ", Nxt)
     print("-----------------------------------")
+    return Cv, Nxt
 
-def autocorrelation_time(filepath, filename_E, filename_M, t, save=False):
-    t_eq = 4000
+def autocorrelation_time(filepath, filename_E, filename_M, L, t, save=False):
+    match(L):
+        case 25:
+            t_eq = 2000
+        case 50:
+            t_eq = 4500
+        case 100:
+            t_eq = 2000
     energies =  np.array(load_vector(filepath + filename_E))[t_eq:]
-    magnetizations = np.array(load_vector(filepath + filename_M))[t_eq:] #Cutting of data before equilibrium
+    magnetizations = np.array(load_vector(filepath + filename_M))[t_eq:] #Cutting of data after equilibrium
+    #Averages over each spin
+    energies /= L**2
+    magnetizations /= L**2
 
     kb = 1
     def Co(t, O):
@@ -130,25 +141,112 @@ def autocorrelation_time(filepath, filename_E, filename_M, t, save=False):
         Co_third = 0
         t_max = len(O)
         div_fac = 1/(t_max - t)
-        if t != 0:
-            for t_it in range(t_max-t):
-                Co_first += O[t_it] * O[t_it + 1] * div_fac
-                Co_second += O[t_it] * div_fac
-                Co_third += O[t_it + 1] * div_fac
-        else:
-            for t_it in range(t_max-t):
-                Co_first += O[t_it] * O[t_it] * div_fac
-                Co_second += O[t_it] * div_fac
-                Co_third += O[t_it] * div_fac
+        for t_it in range(t_max-t):
+            Co_first += O[t_it] * O[t_it + t] * div_fac
+            Co_second += O[t_it] * div_fac
+            Co_third += O[t_it + t] * div_fac
+
         return Co_first - Co_second*Co_third
 
-    tau_mag = sum([Co(t_it, magnetizations/len(magnetizations)) for t_it in range(t)])
-    tau_en = sum([Co(t_it, energies/len(energies)) for t_it in range(t)])
-    print(f"Magnetic Co: {Co(t, magnetizations/len(magnetizations))}")
-    print(f"Energy Co: {Co(t, energies/(len(energies)))}")
+    t_max = len(magnetizations)
+    
+    Cm_t = [Co(t_it, magnetizations) for t_it in range(t)]
+    Ce_t = [Co(t_it, energies) for t_it in range(t)]
+    ts = np.linspace(0,t, dtype=int, num=len(Cm_t))
+    tau_mag = sum(Cm_t)
+    tau_en = sum(Ce_t)
+    print(f"Magnetic Co: {Co(t, magnetizations)}")
+    print(f"Energy Co: {Co(t, energies)}")
     print(f"Tau for magnetization = {tau_mag}")
+    print(f"len mag: {len(magnetizations)}, len cm_t: {len(Cm_t)}, len ts: {len(ts)}")
     print(f"Tau for energy = {tau_en}")
 
+    #Plotting and fitting section
+    f = lambda t,tau,a,b: a + b*np.e**(-t/tau) #Add a c?
+    popt_mag, pcov_mag = curve_fit(f, ts, Cm_t )
+    popt_en, pcov_en = curve_fit(f, ts, Ce_t)
+
+    perr_mag = np.sqrt(np.diag(pcov_mag))
+    perr_en = np.sqrt(np.diag(pcov_en))
+    print(f"Tau for magnetization = {popt_mag[0]} ± {perr_mag[0]}")
+    print(f"Tau for energy = {popt_en[0]} ± {perr_en[0]}")
+
+    #---------Magnetization------------
+    plt.clf()
+    plt.plot(ts, Cm_t, label=r"$C_m(t)$")
+    plt.plot(ts, f(ts, *popt_mag), label=r"$\tau$ fitted %3.3f ± %3.3f" % (popt_mag[0], perr_mag[0]))
+    plt.xlabel("time (MC steps per spin)")
+    plt.legend()
+    if save:
+        new_filepath = "./figures/L="+str(L)+"/" 
+        new_filename_M = "T="+str(T)+"_M_tau_fitted_vec_"+str(t_eq)+"_to_"+str(t_eq+t_max-t)+".png"
+        directory_path = os.path.dirname(new_filepath)
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+        plt.savefig(new_filepath+new_filename_M)
+        print("Figure saved in local path: " + new_filepath)
+    else:
+        plt.show()
+    #---------Energy-------------
+    plt.clf()
+    plt.plot(ts, Ce_t, label=r"$C_e(t)$")
+    plt.plot(ts, f(ts, *popt_en), label=r"$\tau$ fitted = %3.3f ± %3.3f" % (popt_en[0], perr_en[0]))
+    plt.xlabel("time (MC steps per spin)")
+    plt.legend()
+    if save:
+        new_filepath = "./figures/L="+str(L)+"/" 
+        new_filename_E = "T="+str(T)+"_E_tau_fitted_vec_"+str(t_eq)+"_to_"+str(t_eq+t_max-t)+".png"
+        directory_path = os.path.dirname(new_filepath)
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+        plt.savefig(new_filepath+new_filename_E)
+        print("Figure saved in local path: " + new_filepath)        
+    else:
+        plt.show()
+
+
+def cv_and_X_plot(filepath, sweeps, L, save = False):
+    filename_E = filepath + "energies_Tnum="
+    filename_M = filepath + "magnetizations_Tnum="
+    rest_of_file = "_sweeps="+str(sweeps)+".txt"
+    Energies = [np.array(load_vector(filename_E + str(Tnum) + rest_of_file)) for Tnum in range(1,21)]
+    Magnetizations = [np.array(load_vector(filename_M + str(Tnum) + rest_of_file)) for Tnum in range(1,21)]
+    T_actuals = np.linspace(0.1,5,20)
+    T_c = 2/np.log(1+np.sqrt(2))
+    Cvs = []
+    Xs  = []
+    kb = 1
+    for i in range(len(Energies)):
+        average_enery = sum(Energies[i])/len(Energies[i])
+        average_enery_squared = sum((Energies[i])**2)/len(Energies[i])
+        average_mag = sum(Magnetizations[i])/len(Magnetizations[i])
+        average_mag_squared = sum((Magnetizations[i])**2)/len(Magnetizations[i])
+
+        Cvs.append((average_enery_squared - average_enery**2)/(kb*T**2*L**2)) #Skal jeg ha L**2?
+        Xs.append((average_mag_squared - average_mag**2)/(kb*T*len(Magnetizations[i])))
+    
+    plt.plot(T_actuals, Cvs, label="Cv")
+    plt.plot(T_actuals, Xs, label="Susceptibility")
+    plt.legend()
+    plt.show()
+
+def final_size_scaling(filepath, sweeps, Ls, save = False):
+    magnetizations = [np.array(load_vector(filepath+"magnetizations_L="+str(L)+"_sweeps="+str(sweeps)+".txt")) for L in Ls]
+    Xs = []
+    M_v  = []
+    kb = 1
+    for i in range(len(Ls)):
+
+        average_mag = sum(magnetizations[i])/len(magnetizations[i])
+        average_mag_squared = sum((magnetizations[i])**2)/len(magnetizations[i])
+
+        #Skal jeg ha L**2?
+        Xs.append((average_mag_squared - average_mag**2)/(kb*T*len(magnetizations[i])*L**2))
+        M_v.append(average_mag/(Ls[i]**2)) #assuming V=L**2
+    M_v = np.array(M_v)
+    plt.plot((Ls), (M_v))
+    plt.plot(Ls, Xs)
+    plt.show()
 
 def save_configurations(filepath, filename, sweeps, L, save=False):
     data = load_3D_vector(filepath + filename)
@@ -263,9 +361,9 @@ def load_3D_vector(filename):
 
 T_c = 2.269185
 T = 3.000000
-L = 50
+L = 25
 sweeps = 10000
-filepath = "./data/T={:.6f}/".format(T_c)
+filepath = "./data/T={:.6f}/".format(T)
 filename_t = "timesteps_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
 filename_E = "energies_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
 filename_M = "magnetizations_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
@@ -275,13 +373,22 @@ filename_spins = "saved_spin_values_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
 # show_2D_animation(filepath, filename_spins, sweeps, L, False)
 # save_configurations(filepath, filename_spins, sweeps, L, False)
 
-filepath_2 = "./data/L="+str(L)+"/"
-filename_Cv = "specific_heat_sweeps="+str(sweeps)+".txt"
-filename_X = "susceptibility_sweeps="+str(sweeps)+".txt"
-filename_T = "Temps"
-
 
 # plot_Cv(filepath_2, filename_Cv, filename_T)
 # plot_susceptibility(filepath_2,filename_X,filename_T)
 # print_observables(filepath, filename_E, filename_M)
-autocorrelation_time(filepath, filename_E, filename_M, 2000)
+# autocorrelation_time(filepath, filename_E, filename_M, L, 500)
+# cv_and_X_plot("./data/tempsweeps/L="+str(L)+"/", sweeps,L, save = False)
+# final_size_scaling("./data/T=2.269185/", 10000, np.array([25,50,100]))
+
+#Saving many figs
+Ls = [100]
+Ts = [1.000000, T_c, 3.000000]
+sweeps = 10000
+for T in Ts:
+    filepath = "./data/T={:.6f}/".format(T)
+    for L in Ls:
+        filename_t = "timesteps_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
+        filename_E = "energies_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
+        filename_M = "magnetizations_L="+str(L)+"_sweeps="+str(sweeps)+".txt"
+        autocorrelation_time(filepath, filename_E, filename_M, L, 500, True)
