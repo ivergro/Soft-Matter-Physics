@@ -29,9 +29,8 @@ bool metropolis(const double delta_E, const double beta){
  * @return `int` New energy of matrix
  */
 void glauber(const int L, const double T, int &E, int &M, vector<vector<int>> &spins){
-    //Random numbers from 0 to L-1
-    // int r_col = rand() % L; 
-    // int r_row = rand() % L;
+    
+
     const double beta = 1/(K_b*T);
     uniform_int_distribution<int> distribution(0, L-1); 
 
@@ -43,7 +42,7 @@ void glauber(const int L, const double T, int &E, int &M, vector<vector<int>> &s
         int r_row = distribution(glauber_gen);
         int* sigma_pointer = &(spins.at(r_row)).at(r_col); //The spin pointer
         const int spin_val = *sigma_pointer;
-        int delta_E = 2*spin_val * J *calculate_neighbour_values(L, spins, r_row, r_col); //Per def fra notes 4 (1.62)
+        int delta_E = 2* spin_val * J *calculate_neighbour_values(L, spins, r_row, r_col); //Per def fra notes 4 (1.62)
 
         //Doing metropolis acceptance to see if the change in spin should happen. Ignoring it if not succeded.
         if (metropolis(delta_E, beta)){
@@ -127,32 +126,21 @@ void run_IM(const double T, const int L, const int sweeps){
     //Initialize
     vector<vector<int>> spins = initialize_spins(L, M);
     E = calculate_E(L, spins);
-    // M = calculate_M(spins);
-    vector<int> timesteps;
     vector<int> energies;
-    // vector<int> energies_squared;
     vector<int> magnetizations;
     vector<vector<vector<int>>> saved_spin_values;
-    // vector<int> magnetizations_squared;
     cout << "Initial energy: " << E << endl;
-    // classic_write_to_file(spins, "./data/", "initialized_spins.txt");
     //MC sweeps
-    timesteps.push_back(0);
     energies.push_back(E);
     magnetizations.push_back(M);
     saved_spin_values.push_back(spins);
     for (int t = 1; t < sweeps; t++){
         glauber(L, T, E, M, spins); //Does the changes to the vector globally instead of returning the spins
-        // E = pair_energies.first;
-        // E_squared = pair_energies.second;
+
         if (t%save_every == 0){ //Shows 5 sweep values
-            // cout << "Sweep " << t << ") \tenergy: " << E << endl;
             //Saving values
-            timesteps.push_back(t);
             energies.push_back(E);
-            // energies_squared.push_back(E_squared);
             magnetizations.push_back(calculate_M(spins));
-            // magnetizations_squared.push_back
         }
         if (t%100 == 0){
             saved_spin_values.push_back(spins); //Saving spin values
@@ -162,65 +150,40 @@ void run_IM(const double T, const int L, const int sweeps){
     //Saving values to be analyzed
     cout << "Final energy: " << E << "  after " << sweeps << " sweeps" << endl;
     string directory = "./data/T=" + to_string(T) + "/";
-    classic_write_to_file(timesteps, directory, "timesteps_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     classic_write_to_file(energies, directory, "energies_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    // // classic_write_to_file(energies_squared, directory, "energies_squared_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
     classic_write_to_file(magnetizations, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    // classic_write_to_file(magnetizations_squared, directory, "magnetizations_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
-    classic_write_3Dvec_to_file(saved_spin_values, directory, "saved_spin_values_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
+    // classic_write_3Dvec_to_file(saved_spin_values, directory, "saved_spin_values_L="+to_string(L)+"_sweeps="+ to_string(sweeps)+".txt");
 }
 
-pair<double,double>     run_IM_different_temps(const double T, const int L, const int sweeps,const vector<vector<int>> &spins){
-    //Initializing
-    const int N = pow(L,2);
-    vector<vector<int>> temp_spins = spins; //Copying initialized spins
-    // const int t_eq = 1000; //To make the system reach equilibrium (tau_eq)
-    
-    //Values to be calculated
+void run_IM_different_temps(const double T, const int L, const int sweeps, const int T_num){
+    //Constants
+    int N = pow(L,2);
+    int E = 0;
+    int E_squared = 0;
+    int save_every = (sweeps < 10000) ? 1 : sweeps / 10000;
+    int M = 0;
+    //Initialize
+    vector<vector<int>> spins = initialize_spins(L, M);
+    E = calculate_E(L, spins);
     vector<int> energies;
     vector<int> magnetizations;
-
-    int E = calculate_E(L, spins);
-    // int E_squared = pow(E,2); 
-    int M = calculate_M(spins);
-    // int M_squared = pow(M,2); //Constant no? Just sum of all spins squared, and since all spins are +-1, its just N
-
-    //Used to calculate average observables in the end
-    double E_sum = E;
-    double E_squared_sum = E*E;
-    double M_sum = M;
-    double M_squared_sum = M*M;
-
-        //Thermalization to reach equilibration
-        // for(int i = 0; i < t_eq; i++){
-        //     glauber(L, T, E, E_squared, M, temp_spins); //Does the changes to the vector globally instead of returning the spins
-        // }
-
-        //Checking fluctuations
-    for(int j = 0; j < sweeps; j++){
-        glauber(L,T,E,M,temp_spins); //Right now doesn't make sense to have two different operations, since the first and second are equal
-        E_sum += E;
-        E_squared_sum += E*E;
-        M_sum += M;
-        M_squared_sum += M*M;
+    cout << "Initial energy: " << E << endl;
+    //MC sweeps
+    energies.push_back(E);
+    magnetizations.push_back(M);
+    for (int t = 1; t < sweeps; t++){
+        glauber(L, T, E, M, spins); //Does the changes to the vector globally instead of returning the spins
+        //Saving values
+        energies.push_back(E);
+        magnetizations.push_back(calculate_M(spins));
+        
     }
-    //Can be removed later
-    double E_mean_sum = E_sum/N;
-    double E_squared_mean_sum = E_squared_sum/N;
-    double M_mean_sum = M_sum/N;
-    double M_squared_mean_sum = M_squared_sum/N;
 
-    //Using ergodicity theorem(adding one sweep because the start values are added to each sum)
-    double E_org = E_mean_sum/(sweeps + 1);
-    double E_squared_org = E_squared_mean_sum/(sweeps + 1);
-    double M_org = M_mean_sum/(sweeps + 1);
-    double M_squared_org = M_squared_mean_sum/(sweeps + 1);
-
-    double specific_heat = (E_squared_org - E_org*E_org)/(K_b*T*T)*N; //Gange med N for å gjøre opp for averagen?
-    double susceptibility = N*(M_squared_org - M_org*M_org)/(K_b*T); //Er beta kb*T her?
-
-    return pair<double,double> (specific_heat, susceptibility);
-    
+    //Saving values to be analyzed
+    cout << "Final energy: " << E << "  after " << sweeps << " sweeps" << endl;
+    string directory = "./data/tempsweeps/L=" + to_string(L) + "/";
+    classic_write_to_file(energies, directory, "energies_Tnum="+to_string(T_num)+"_sweeps="+ to_string(sweeps)+".txt");
+    classic_write_to_file(magnetizations, directory, "magnetizations_Tnum="+to_string(T_num)+"_sweeps="+ to_string(sweeps)+".txt");
 }
 
 

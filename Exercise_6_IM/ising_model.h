@@ -26,4 +26,4 @@ int calculate_M(const vector<vector<int>> &spins);
 
 void run_IM(const double T, const int L, const int sweeps);
 
-pair<double,double> run_IM_different_temps(const double T, const int L, const int sweeps,const vector<vector<int>> &spins);
+void run_IM_different_temps(const double T, const int L, const int sweeps, const int T_num);
