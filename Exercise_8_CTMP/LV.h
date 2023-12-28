@@ -7,9 +7,9 @@ using namespace std;
 
 class LV {
     //Variables
-    const double k1 = 3.;
-    const double k2 = 0.01;
-    const double k3 = 5.;
+    double k1 = 3.;
+    double k2 = 0.01;
+    double k3 = 5.;
     double t = 0;
     int A1;//Prey
     int A2;//Predator
@@ -29,9 +29,12 @@ class LV {
         //Getters
         double get_A1() const;
         double get_A2() const;
+        //Setters
+        void change_ks(const double new_k1, const double new_k2, const double new_k3);
 
         //Savers
-        void save_vecs(string timesteps, string IC_A1, string IC_A2);
+        void save_vecs_IC(string timesteps, string IC_A1, string IC_A2);
+        void save_vecs_ks(string timesteps, string IC_A1, string IC_A2);
     private:
         void calculate_A1_dt();
         void calculate_A2_dt();

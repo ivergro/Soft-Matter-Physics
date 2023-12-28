@@ -64,12 +64,26 @@ double LV::get_A2() const{
     return A2;
 }
 
+//Setters
+void LV::change_ks(const double new_k1, const double new_k2, const double new_k3){
+    k1 = new_k1;
+    k2 = new_k2;
+    k3 = new_k3;
+}
+
 //Savers
-void LV::save_vecs(string timesteps, string IC_A1, string IC_A2){
-    string filepath = "./data/prey=" + IC_A1 + "_pred=" + IC_A2 + "/";
+void LV::save_vecs_IC(string timesteps, string IC_A1, string IC_A2){
+    string filepath = "./data/change_IC/prey=" + IC_A1 + "_pred=" + IC_A2 + "/";
     classic_write_to_file(A1_vec, filepath, "A1_steps="+timesteps+".txt");
     classic_write_to_file(A2_vec, filepath, "A2_steps="+timesteps+".txt");
     classic_write_to_file(t_vec, filepath, "t_steps="+timesteps+".txt");
+}
+
+void LV::save_vecs_ks(string timesteps, string IC_A1, string IC_A2){
+    string filepath = "./data/change_ks/prey=" + IC_A1 + "_pred=" + IC_A2 + "/"+"k1="+to_string(k1)+"_k2="+to_string(k2)+"_k3="+to_string(k3)+"_steps="+timesteps+"/";
+    classic_write_to_file(A1_vec, filepath, "A1");
+    classic_write_to_file(A2_vec, filepath, "A2");
+    classic_write_to_file(t_vec, filepath, "ts");
 }
 
 
