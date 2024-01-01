@@ -24,6 +24,6 @@ int draw_state_j(const vector<double>& w, const double lambda_C){
             return i;
         }
     }
-    cout << "None of the states were chosen" << endl;
+    cout << "None of the states were chosen during update gillespie" << endl;
     return 0;
 }

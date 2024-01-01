@@ -11,4 +11,4 @@ double draw_tau(const double lambda_C, const double t);
 
 //Function to choose next state "j" to transition to from "C"
 
-int draw_state_j(const vector<double>& a, const double a_0);
+int draw_state_j(const vector<double>& w, const double lambda_C);
