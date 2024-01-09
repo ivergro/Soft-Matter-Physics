@@ -1,0 +1,11 @@
+N = 100
+N_steps = 100
+box_x = 100
+box_y = 100
+box_z = 100
+temperature = 1
+delta_x = 1
+myseed = 1
+sigma = 1
+model = 0
+ratio_samplings = 1000
