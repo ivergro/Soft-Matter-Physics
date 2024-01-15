@@ -117,8 +117,12 @@ void create_directory_if_not_exists(char *dir) {
 
 void save_config(){
     char dir[256];
-    sprintf(dir, "./data/density=%.2f/dx=%.2fsigma", mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z), mySys.disp_max);
-    create_directory_if_not_exists(dir);
+    if (mySys.model == 0){
+        sprintf(dir, "./data2/density=%.2f/dx=%.2fsigma", mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z), mySys.disp_max);
+    }
+    else if (mySys.model == 1){
+        sprintf(dir, "./data/LJ/T=%.1f/density=%.2f/dx=%.2fsigma", mySys.T, mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z), mySys.disp_max);
+    }create_directory_if_not_exists(dir);
 
     char filename[256];
     sprintf(filename, "%s/run%d.xyz", dir, mySys.run);
@@ -142,12 +146,15 @@ void save_config(){
 
     //End results
     fprintf(fp, "E = %f\n", mySys.energy);
+    fprintf(fp, "P = %f\n", mySys.pressure);
     fprintf(fp, "Lattice={%.2f %.2f %.2f}\n", mySys.box_x, mySys.box_y, mySys.box_z);
     for (int i = 0; i < mySys.NPart; i++)
     {
         fprintf(fp, "pos: %.2f %.2f %.2f\n", parts[i].x, parts[i].y, parts[i].z);
     }
     fclose(fp);
+
+    printf("Saved config to %s\n", dir);
 }
 
 void print_positions(){
@@ -172,27 +179,39 @@ void set_box_size(int i){
     switch(i) {
         case 0:
             //0.05
-            mySys.box_x = 10;
-            mySys.box_y = 10;
-            mySys.box_z = 20;
+            // mySys.box_x = 10;
+            // mySys.box_y = 10;
+            // mySys.box_z = 20;
+            mySys.box_x = pow(2000, 1.0/3.0);
+            mySys.box_y = pow(2000, 1.0/3.0);
+            mySys.box_z = pow(2000, 1.0/3.0);
             break;
         case 1:
             //0.3
-            mySys.box_x = 3.33;
-            mySys.box_y = 10;
-            mySys.box_z = 10;
+            // mySys.box_x = 3.33;
+            // mySys.box_y = 10;
+            // mySys.box_z = 10;
+            mySys.box_x = pow(333.33, 1.0/3.0);
+            mySys.box_y = pow(333.33, 1.0/3.0);
+            mySys.box_z = pow(333.33, 1.0/3.0);
             break;
         case 2:
             //0.5
-            mySys.box_x = 5;
-            mySys.box_y = 5;
-            mySys.box_z = 8;
+            // mySys.box_x = 5;
+            // mySys.box_y = 5;
+            // mySys.box_z = 8;
+            mySys.box_x = pow(200, 1.0/3.0);
+            mySys.box_y = pow(200, 1.0/3.0);
+            mySys.box_z = pow(200, 1.0/3.0);
             break;
         case 3:
             //1
             mySys.box_x = 4;
             mySys.box_y = 5;
             mySys.box_z = 5;
+            // mySys.box_x = pow(100, 1.0/3.0);
+            // mySys.box_y = pow(100, 1.0/3.0);
+            // mySys.box_z = pow(100, 1.0/3.0);
             break;
         default:
             fprintf(stderr, "Error: got input %d, box_x, box_y, box_z not set properly\n", i);
@@ -226,4 +245,25 @@ void set_disp_max(int i){
             fprintf(stderr, "Error: disp_max not set properly\n");
             break;
     }
+}
+
+double calculate_r(int i, int j){
+    double dx = parts[i].x - parts[j].x;
+    double dy = parts[i].y - parts[j].y;
+    double dz = parts[i].z - parts[j].z;
+    dx = MinD(dx, mySys.box_x);
+    dy = MinD(dy, mySys.box_y);
+    dz = MinD(dz, mySys.box_z);
+    double r2 = dx*dx + dy*dy + dz*dz; //r2 = r^2!
+    double r = sqrt(r2);
+    return r;
+}
+
+double* linspace(double a, double b, int n){
+    double *array = malloc(n * sizeof(double));
+    double step = (b-a)/(n-1);
+    for (int i = 0; i < n; i++){
+        array[i] = a + i*step;
+    }
+    return array;
 }

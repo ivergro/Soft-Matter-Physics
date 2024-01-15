@@ -66,17 +66,19 @@ void do_MC_sweep()
     
 
     // 3. Compute the energy of the system before the displacement.
-    double oldEnergy = compute_energy(); //TODO, implement, calculate energy of system before displacement
+    double oldEnergy = mySys.energy;
     translation(r_ind);
     // 4. Displace the particle and compute the energy of the system after the displacement
-    double newEnergy = compute_energy();
+    double newEnergy = compute_energy_somemodel();
     
     // 5. Accept or reject according to the Metropolis rule.
-    if (ran2(&mySys.seed) < exp(oldEnergy - newEnergy)) //Higher new energy than old energy would lead to a low number, decreasing the chance of acceptance
+    if (ran2(&mySys.seed) < exp((oldEnergy - newEnergy)/mySys.T)) //Higher new energy than old energy would lead to a low number, decreasing the chance of acceptance
     {
         // printf("Accepted\n");
         // print_position(r_ind);
         mySys.accepted[0]++;    //Increment number of accepted translations
+        mySys.energy = newEnergy;
+        if (mySys.model == 1){ mySys.pressure = tot_pressure();}
     }
     else
     {   
@@ -90,8 +92,9 @@ void do_MC(){
     char dumpname[100];
     char restartname[100];
 
-    FILE* f = fopen("energy.dat", "a");
-    FILE* g = fopen("acceptance.dat", "a"); 
+    FILE* f = fopen("./output_data/energy.dat", "a");
+    FILE* g = fopen("./output_data/acceptance.dat", "a"); 
+    FILE* p = fopen("./output_data/pressure.dat", "a");
 
     sprintf(restartname,"restartpoint.dat");
 
@@ -102,7 +105,8 @@ void do_MC(){
         //if(mySys.step % 1000 == 0)  WriteConf(restartname);
      
         if(mySys.step % mySys.NPrint == 0){ 
-            printf("dumping...\n");
+            fprintf(f, "%ld. E = %4f\n", mySys.step, mySys.energy);
+            fprintf(p, "%ld. P = %4f\n", mySys.step, mySys.pressure);
         }
     }
    

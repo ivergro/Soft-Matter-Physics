@@ -30,8 +30,11 @@ typedef struct
     double disp_max;		       //maximum allowed displacement for colloids
 	
     double box_x, box_y, box_z;
-    double T;	
+    double T;	                    //T*, reduced units T/Kb
     double energy;
+    double pressure;
+    double energies[N_MOVES];		//array with energy for different moves
+    double pressures[N_MOVES];		//array with pressure for different moves
     
     double sigma;
 
