@@ -1,10 +1,10 @@
 #include "verlet.h"
 
 
-vector<double> next_r(const vector<double>& r_now, const vector<double>& r_prev, const vector<double>& a_now, const double dt){
+vector<double> next_r(const vector<double>& r_now, const vector<double>& r_prev, const vector<double>& f_now, const double dt, const double m){
     vector<double> r_next(r_now.size());
     for (int i = 0; i < r_now.size(); ++i) {
-        r_next[i] = 2*r_now[i] - r_prev[i] + a_now[i]*dt*dt;
+        r_next[i] = 2*r_now[i] - r_prev[i] + f_now[i]*dt*dt/m;
     }
     return r_next;
 }
@@ -37,4 +37,22 @@ vector<double> r_dt(const vector<double>& r_0, const vector<double>& v_0, const 
         rdt[i] = r_0[i] + v_0[i]*dt + f_0[i]*dt*dt/(2*m);
     }
     return rdt; 
+}
+
+//Momentum half kick, used to update pos inbetween verlet steps
+vector<double> v_half_kick(const vector<double>& v_now, const vector<double>& f_now, const double dt, const double m){
+    vector<double> v_next(v_now.size());
+    for (int i = 0; i < v_now.size(); ++i) {
+        v_next[i] = v_now[i] + f_now[i]*dt/(2*m);
+    }
+    return v_next;
+}
+
+
+vector <double> r_half_kick(const vector<double>& r_now, const vector<double>& v_now, const vector<double>& f_now, const double dt, const double m){
+    vector<double> r_half(r_now.size());
+    for (int i = 0; i < r_now.size(); ++i) {
+        r_half[i] = r_now[i] + v_now[i]*dt + f_now[i]*dt*dt/(2*m);
+    }
+    return r_half;
 }

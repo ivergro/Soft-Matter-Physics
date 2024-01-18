@@ -18,7 +18,6 @@ double next_f(const double x_now, const double x_eq, const double k){
     return -k*(x_now - x_eq);
 }
 
-// double half_kick(const double v_now, const double a_now, const double a_next, const double dt){
-//     return v_now + 
-// }
-
+double next_f_HO(const double q, const double w){
+    return -w*w*q;
+}
