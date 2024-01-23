@@ -7,7 +7,7 @@ struct Particle
 {
     double x, y, z;     //colloid coordinates
     double vx, vy, vz;	//colloid velocities
-    double fx, fy, fz;	//colloid forces
+    double fx, fy, fz = 0;	//colloid forces
     double ofx, ofy, ofz;	//colloid old forces, used to calculate v(t+dt)
 
     const double m = 1.0; //mass of the particle
@@ -22,7 +22,6 @@ class System
     int restart;
     long seed;
 
-	
     double box_x, box_y, box_z;
     double T;	                    //T*, reduced units T/Kb
     // double tot_energy;
@@ -38,11 +37,20 @@ class System
 
     private:
         void read_input_file(int run_LJ);
-        void save_velocities(string filepath);
-
+        void save_components(string filepath, char component);
     public:
-        System(int run_LJ);
+        System(int run_LJ, double rc);
         void draw_velocities();
         void save_config();
-};
 
+        void set_r_cut(double rc);
+        double get_sigma();
+
+
+        void update_r(const double dt);
+        void update_v(const double dt);
+        void update_f();
+        void prepare_f();
+
+        void run_MD();
+};
