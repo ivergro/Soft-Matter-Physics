@@ -10,6 +10,8 @@ void read_input_file(int run_LJ)
         _myfile = fopen("param.dat", "r");
     } else if(run_LJ == 1){
         _myfile = fopen("param_LJ.dat", "r");
+    } else if(run_LJ == 2){
+        _myfile = fopen("param_ex11.dat", "r");
     }
     
     

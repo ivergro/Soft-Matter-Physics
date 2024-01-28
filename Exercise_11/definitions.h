@@ -3,6 +3,7 @@
 #include "utilities.h"
 
 
+//Reuse some of ex8 code
 struct Particle
 {
     double x, y, z;     //colloid coordinates

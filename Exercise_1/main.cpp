@@ -20,6 +20,7 @@ int main(){
          << "5) Ex 2.4 Importance Sampling\n"
          << "6) Ex 2.4 Numerical average\n"
          << "7) Ex 2.5 Markov chains\n"
+         << "8) Ex 2.6 Additional exercises\n"
          << "Default exit\n"
          << "input: ";
     int input = -1;
@@ -167,6 +168,26 @@ int main(){
             start_vec.set(1,0,1.);
             find_periodicity(P_18(), start_vec, 10000);
             break;
+        } case 8:{
+            int N = 100000;
+            double mu = 10;
+            double a = 2;
+            double n = 2;
+            cout << "Inversion method of additional exercises:\n";
+            vector<double> random_numbers_1(N);
+            vector<double> random_numbers_2(N);
+            vector<double> random_numbers_3(N);
+            // vector<double> extra_RN(N);
+            for (int i=0; i < N; i++){
+                double rv = (double) rand() / RAND_MAX;
+                random_numbers_1.at(i) = add_inv_1(rv, mu);
+                random_numbers_2.at(i) = add_inv_2(rv);
+                random_numbers_3.at(i) = add_inv_3(rv, a, n);
+
+            }
+            classic_write_to_file(random_numbers_1, "./data/add_inv/","1_mu=" + to_string(mu) + "_N=" + to_string(N) + ".txt");
+            classic_write_to_file(random_numbers_2, "./data/add_inv/","2_N=" + to_string(N) + ".txt");
+            classic_write_to_file(random_numbers_3, "./data/add_inv/","3_a=" + to_string(a) + "_n=" + to_string(n) + "_N=" + to_string(N) + ".txt");
         }
         default:
             break;

@@ -204,7 +204,7 @@ void swap_temp_configurations(vector<IsingModel*> &I_vec, int &num_swaps){
 
 //---------------------------------------------
 
-//Help func
+//Help funcs
 vector<double> linspace(double start, double end, int numPoints) {
     vector<double> result;
     if (numPoints <= 1) {

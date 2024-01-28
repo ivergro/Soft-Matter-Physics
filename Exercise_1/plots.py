@@ -301,6 +301,10 @@ filename_E = "energies_L=25_sweeps=100.txt"
 
 filepath = "data/ex_2_3_1/"
 filename = "rej_meth_N=10000_p=0.600000.txt"
-rejection_method(filepath, filename, False)
-G_value_plot(filepath, "G_vals" + filename[8:], False)
+# rejection_method(filepath, filename, False)
+# G_value_plot(filepath, "G_vals" + filename[8:], False)
 
+filepath = "./data/add_inv/"
+filename1 = "1_mu=10.000000_N=10000.txt"
+filename2 = "2_N=10000.txt"
+draw_histograms(filepath, filename1, name="1", save=False)

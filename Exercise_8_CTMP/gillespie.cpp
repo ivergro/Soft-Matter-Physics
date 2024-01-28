@@ -1,6 +1,6 @@
 #include "gillespie.h"
 
-//går fra x-> inf to inf
+
 double draw_tau(const double lambda_C, const double t){
     random_device rd;
     mt19937 gen(rd());

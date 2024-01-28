@@ -70,7 +70,6 @@ void do_MC_sweep()
     translation(r_ind);
     // 4. Displace the particle and compute the energy of the system after the displacement
     double newEnergy = compute_energy_somemodel();
-    
     // 5. Accept or reject according to the Metropolis rule.
     if (ran2(&mySys.seed) < exp((oldEnergy - newEnergy)/mySys.T)) //Higher new energy than old energy would lead to a low number, decreasing the chance of acceptance
     {

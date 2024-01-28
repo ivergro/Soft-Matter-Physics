@@ -14,7 +14,7 @@ double F_inv(double x, int n){
 
 //Fixed function
 double extra_inversion(){
-    double rv = (double) rand() / RAND_MAX; //To get between 0 and 2
+    double rv = (double) rand() / RAND_MAX; 
     double pow_law = 2*pow(rv,1.0/3.0); //Inv of of CDF of c*x**2, normalized.
     return pow_law;
 }
@@ -41,10 +41,10 @@ pair<double, double> Box_Muller_transformation(){
     double r_unif = 1.;
     double theta_unif = 1.;
     //Avoiding inf possibilities
-    while(r_unif == 1 || theta_unif == 1){
+    while(r_unif == 1){
         r_unif = (double) rand() / RAND_MAX; 
         theta_unif = (double) rand() / RAND_MAX;
-        cout << "Happened!" << endl;
+        // cout << "Happened!" << endl;
     }
     double x = pow(-2*log(1 - r_unif), 1./2.)*cos(2*M_PI*theta_unif);
     double y = pow(-2*log(1 - r_unif), 1./2.)*sin(2*M_PI*theta_unif);
@@ -282,4 +282,23 @@ double varians(const double average_value){
 
 double weird_varians(const double a, const double T){
     return exp(-T*(2-a))/(a*(2-a)) - exp(-2*T);
+}
+
+
+//Additional exercises (1.4)
+double add_inv_1(const double rv, const double mu){
+    return -log(1-rv)/mu;
+}
+
+double add_inv_2(const double rv){
+    return sqrt(-log(1-rv));
+}
+
+//Note, n>1
+double add_inv_3(double rv, const double a, const double n){
+    const double b =-a// -pow(a,1-n)/(1-n);
+    if (rv == 1){
+        rv = 0.99;
+    }
+    return (pow(pow(a,1-n) - rv*b*(1-n)/(a*b), 1/(1-n)) - a)/b;
 }

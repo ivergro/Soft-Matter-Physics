@@ -1,6 +1,7 @@
 #pragma once
 #include "std_lib_facilities.h"
 #include "filewriter.h"
+#define M_PI 3.14159265358979323846
 
 //Exercise 2.2
 double inversion_method(int n);
@@ -71,3 +72,10 @@ double numerical_average_IS(const double T, const int N);
 double varians(const double average_value);
 
 double weird_varians(const double a, const double T);
+
+//addditional exercises
+double add_inv_1(const double rv, const double mu);
+
+double add_inv_2(const double rv);
+
+double add_inv_3(double rv, const double a, const double n);

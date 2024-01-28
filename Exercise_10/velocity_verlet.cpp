@@ -10,7 +10,7 @@ double next_x(const double x_now, const double v_now, const double f_now, const 
 //REMARK: Must be computed after next_x and next_f
 double next_v(const double v_now, const double f_now, const double f_next, const double dt, const double m){
     return v_now + (f_now + f_next)*dt/(2*m);
-}
+}   
 
 //Remark: Must be computed after next_v
 //Spring model
@@ -19,5 +19,5 @@ double next_f(const double x_now, const double x_eq, const double k){
 }
 
 double next_f_HO(const double q, const double w){
-    return -w*w*q;
+    return -w*w*q;  
 }

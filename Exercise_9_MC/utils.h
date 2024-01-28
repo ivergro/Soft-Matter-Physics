@@ -118,14 +118,18 @@ void create_directory_if_not_exists(char *dir) {
 void save_config(){
     char dir[256];
     if (mySys.model == 0){
-        sprintf(dir, "./data2/density=%.2f/dx=%.2fsigma", mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z), mySys.disp_max);
+        sprintf(dir, "./data2/density=%.2f/dx=%.2fsigma/", mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z), mySys.disp_max);
     }
     else if (mySys.model == 1){
-        sprintf(dir, "./data/LJ/T=%.1f/density=%.2f/dx=%.2fsigma", mySys.T, mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z), mySys.disp_max);
-    }create_directory_if_not_exists(dir);
+        sprintf(dir, "./data/LJ/T=%.1f/density=%.2f/dx=%.2fsigma/", mySys.T, mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z), mySys.disp_max);
+    }
+    else if (mySys.model == 2){
+        sprintf(dir, "./EX11_equilibration/");
+    }
+    create_directory_if_not_exists(dir);
 
     char filename[256];
-    sprintf(filename, "%s/run%d.xyz", dir, mySys.run);
+    sprintf(filename, "%srun%d.xyz", dir, mySys.run);
     FILE *fp = fopen(filename, "w");
 
     //Parameters

@@ -22,6 +22,7 @@ int main(int argc, char* argv[] ) //start with command line options. char*argv[]
     printf("3) Simple cubic crystal case\n");
     printf("4) Lennard Jones potential\n");
     printf("5) Lennard Jones potential for several densities\n");
+    printf("6) Equilibration for ex 11, LJ model\n");
     printf("Enter choice: ");
     int choice;
     scanf("%d", &choice);
@@ -137,6 +138,27 @@ int main(int argc, char* argv[] ) //start with command line options. char*argv[]
                 clean_();
             }
         }
+    case 6:
+        printf("Equilibration for ex 11, LJ model");
+        read_input_file(2);
+        printf("Parameters:\n");
+        print_model_parameters();
+        for (int i = 0; i < 10; i++){
+            allocate_();    //Allocates memory for the particles "parts" vector
+            print_metadata();
+
+            printf("Initializing\n");
+            initialize_particles_randomly();            
+            
+
+            printf("Running MC sim\n");
+            mySys.run = i;
+            do_MC();
+            save_config();
+            // Release memory used by particles and resets mySys
+            clean_();
+        }
+        break;
     default:
         printf("Invalid choice\n");
         break;

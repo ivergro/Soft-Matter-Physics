@@ -122,6 +122,9 @@ double compute_energy_somemodel(){
         case 1:
             en = compute_energy_LJ();
             break;
+        case 2:
+            en = compute_energy_LJ();
+            break;
         default:
             printf("Error: model not set properly\n");
             break;
@@ -139,6 +142,7 @@ double LJ_pressure(double r){
     return V_LJ;
 }
 
+//Always negative
 double tail_pressure(double sigma_cut){
     double density = mySys.NPart/(mySys.box_x*mySys.box_y*mySys.box_z);
     return 16/3 * PI*density*density*(2/3*pow(mySys.sigma/sigma_cut, 9) - pow(mySys.sigma/sigma_cut, 3));
@@ -180,9 +184,9 @@ double tot_pressure(){
             if (i <= j) continue; //Avoiding double counting
             else{
                 double r = calculate_r(i, j);
-                if(r < sigma_cut){
+                if(r <= sigma_cut){
                     P += LJ_pressure(r)/V;
-                } else if( r >= sigma_cut){
+                } else if( r > sigma_cut){
                     P += tail_pressure(mySys.sigma);
                 }else{
                     printf("Error: r is negative\n");

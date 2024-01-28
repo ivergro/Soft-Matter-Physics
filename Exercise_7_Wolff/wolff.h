@@ -1,9 +1,7 @@
 #pragma once
-#include <iostream>
-#include <vector>
-#include <random>
-#include <cmath>
-#include <fstream>
+#include "std_lib_facilities.h"
+
+
 
 using namespace std;
 

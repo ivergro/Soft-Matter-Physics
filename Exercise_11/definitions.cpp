@@ -15,7 +15,7 @@ void System::read_input_file(int run_LJ){
     ifstream _myfile;
     _myfile.open("./EX11_equilibration/run"+to_string(run_LJ)+".xyz");
     if (!_myfile.is_open()) {
-        cerr << "Error: Unable to create or open the file" << std::endl;
+        cerr << "Error: Unable to create or open the file" << endl;
         exit(1);
     }
     string line;
@@ -88,7 +88,7 @@ void System::save_components(string filepath, char component){
     string filename = "run"+to_string(this->run)+"_"+component+".xyz";
     ofstream outfile(filepath + filename);
     if (!outfile.is_open()) {
-        cerr << "Error: Unable to create or open the file '" << filename << "'" << " with path '" << filepath << "'" << std::endl;
+        cerr << "Error: Unable to create or open the file '" << filename << "'" << " with path '" << filepath << "'" << endl;
         if (filesystem::create_directory(filepath)) {
             cout << "Directory '" << filepath << "' created successfully." << endl;
             this->save_components(filepath, component);
